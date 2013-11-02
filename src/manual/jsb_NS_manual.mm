@@ -478,8 +478,8 @@ JSBool JSB_UITouch_id(JSContext *cx, uint32_t argc, jsval *vp) {
 	JSB_PRECONDITION( argc == 0, "Invalid number of arguments" );
 	
 	UITouch* real = (UITouch*) [proxy realObj];
-	
-	JS_SET_RVAL(cx, vp, UINT_TO_JSVAL((uint32_t)real));
+
+	JS_SET_RVAL(cx, vp, JSB_jsval_from_long(cx, (long)real));
 	return JS_TRUE;
 }
 

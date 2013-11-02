@@ -465,7 +465,7 @@ JSBool JSB_jsval_to_opaque( JSContext *cx, jsval vp, void **r)
 	JSB_PRECONDITION2( JS_GetTypedArrayByteLength( tmp_arg ) == sizeof(void*), cx, JS_FALSE, "Invalid Typed Array length");
 	
 	uint32_t* arg_array = (uint32_t*)JS_GetArrayBufferViewData( tmp_arg );
-	uint64 ret =  arg_array[0];
+	uint64_t ret =  arg_array[0];
 	ret = ret << 32;
 	ret |= arg_array[1];
 	
