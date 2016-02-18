@@ -84,6 +84,15 @@ def xml2d(e):
     return {e.tag: _xml2d(e)}
 
 
+# backward compatibility thing:
+# newer versions of gen_bridge_metadata used the "struct something*" format
+# for declared types.
+# older versions where just using "something*".
+def sanitize_declared_type(dt):
+    if dt.startswith("struct "):
+        return dt[7:]
+    return dt
+
 class JSBGenerate(object):
 
     def __init__(self, config):
@@ -269,6 +278,7 @@ class JSBGenerate(object):
         if self.is_class_method(method) and 'retval' in method:
             retval = method['retval']
             dt = retval[0]['declared_type']
+            dt = sanitize_declared_type(dt)
 
             # Should also check the naming convention. eg: 'spriteWith...'
             if dt == 'id':
@@ -284,6 +294,7 @@ class JSBGenerate(object):
         if 'retval' in method:
             retval = method['retval']
             dt = retval[0]['declared_type']
+            dt = sanitize_declared_type(dt)
 
             if method['selector'].startswith('init') and dt == 'id':
                 return True
@@ -453,6 +464,7 @@ class JSBGenerate(object):
 
         t = arg['type']
         dt = arg['declared_type']
+        dt = sanitize_declared_type(dt)
 
         # Treat 'id' as NSObject*
         if dt == 'id':
@@ -2247,11 +2259,14 @@ void %s_createClass(JSContext *cx, JSObject* globalObj, const char* name )
         # Manually bound methods too
         if klass_name in self.manual_bound_methods:
             for func_name in self.manual_bound_methods[klass_name]:
-                # skip constructors / destructors
-                if self.is_oof_method(klass_name, func_name):
-                    f = self.get_function(func_name)
-                    js_fn_name, native_fn_name, args = self.get_name_for_oof(klass_name, f)
-                    self.fd_mm.write(template_funcs_body % (js_fn_name, native_fn_name, args))
+                try:
+                    # skip constructors / destructors
+                    if self.is_oof_method(klass_name, func_name):
+                        f = self.get_function(func_name)
+                        js_fn_name, native_fn_name, args = self.get_name_for_oof(klass_name, f)
+                        self.fd_mm.write(template_funcs_body % (js_fn_name, native_fn_name, args))
+                except ParseException, e:
+                    sys.stderr.write('NOT OK: "%s" Error: %s\n' % (func_name, str(e)))
 
         # post template
         self.fd_mm.write(template_funcs_post)
@@ -2345,7 +2360,7 @@ var %s = %s || {};
             ))
 
     def create_files(self):
-        self.fd_js = open('../js/jsb_%s_constants.js' % (self.namespace), 'w')
+        self.fd_js = open('jsb_%s_constants.js' % (self.namespace), 'w')
 
     def get_name_for_constant(self, name):
         prefix = self.get_constant_property('prefix_to_remove')
