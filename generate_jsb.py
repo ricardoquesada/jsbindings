@@ -233,9 +233,9 @@ class JSBGenerate(object):
         # More info:
         # https://developer.mozilla.org/en/SpiderMonkey/JSAPI_Reference/JS_ConvertArguments
         self.args_js_types_conversions = {
-            'b': ['JSBool',    'JS_ValueToBoolean'],
-            'd': ['double',    'JS_ValueToNumber'],
-            'I': ['double',    'JS_ValueToNumber'],    # double converted to string
+            'b': ['JSBool',    'JS::ToBoolean'],
+            'd': ['double',    'JS::ToNumber'],
+            'I': ['double',    'JS::ToNumber'],    # double converted to string
             'i': ['int32_t',   'JSB_jsval_to_int32'],
             'j': ['int32_t',   'JSB_jsval_to_int32'],
             'u': ['uint32_t',  'JSB_jsval_to_uint32'],
@@ -434,13 +434,13 @@ class JSBGenerate(object):
     def generate_retval(self, declared_type, js_type, method=None):
 
         if method and self.is_method_initializer(method):
-            return '\tJS_SET_RVAL(cx, vp, JSVAL_TRUE);'
+            return '\targs.rval().set(JSVAL_TRUE);'
 
         conversion = self.convert_objc_to_js(declared_type, js_type)
         conversion = conversion % ({'objc_val': 'ret_val'})
 
         template = '''
-\tJS_SET_RVAL(cx, vp, %s);
+\targs.rval().set(%s);
 '''
         return template % (conversion)
 
@@ -520,7 +520,7 @@ class JSBGenerate(object):
         return (args_js_type, args_declared_type)
 
     def generate_argument_variadic_2_nsarray(self):
-        template = '\tok &= JSB_jsvals_variadic_to_NSArray( cx, argvp, argc, &arg0 );\n'
+        template = '\tok &= JSB_jsvals_variadic_to_NSArray(cx, args.get(0), &arg0 );\n'
         self.fd_mm.write(template)
 
     def convert_js_to_objc(self, js_type, objc_type):
@@ -569,7 +569,7 @@ class JSBGenerate(object):
     def generate_argument(self, i, arg_js_type, arg_declared_type):
         template = self.convert_js_to_objc(arg_js_type, arg_declared_type)
         template = template % ({
-            "jsval": "*argvp++",
+            "jsval": "args.get(%d)" % i,
             "retval": "&arg%d" % i
         })
         return "\tok &= %s;\n" % template
@@ -591,8 +591,8 @@ class JSBGenerate(object):
 
     def generate_arguments(self, args_declared_type, args_js_type, properties={}):
         # First  time
-        self.fd_mm.write('\tjsval *argvp = JS_ARGV(cx,vp);\n')
-        self.fd_mm.write('\tJSBool ok = JS_TRUE;\n')
+        self.fd_mm.write('\tJS::CallArgs args = JS::CallArgsFromVp(argc, vp);\n')
+        self.fd_mm.write('\tbool ok = true;\n')
 
         # first_arg is used by "OO Functions". The first argument should be "self", so argv[0] is skipped in those cases
         first_arg = properties.get('first_arg', 0)
@@ -637,7 +637,7 @@ class JSBGenerate(object):
                 if optional_args != None and i >= optional_args:
                     self.fd_mm.write('\t}\n')
 
-        self.fd_mm.write('\tJSB_PRECONDITION2(ok, cx, JS_FALSE, "Error processing arguments");\n')
+        self.fd_mm.write('\tJSB_PRECONDITION2(ok, cx, false, "Error processing arguments");\n')
 
     #
     # Externs related
@@ -869,10 +869,10 @@ JSObject* %s_object = NULL;
         # 2: JSB_CCNode,
         # 8: possible callback code
         constructor_template = '''// Constructor
-JSBool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
+bool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
 {
 \tJSObject *jsobj = [%s createJSObjectWithRealObject:nil context:cx];
-\tJS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(jsobj));
+\targs.rval().set(OBJECT_TO_JSVAL(jsobj));
 \treturn JS_TRUE;
 }
 '''
@@ -900,15 +900,15 @@ void %s_finalize(JSFreeOp *fop, JSObject *obj)
     def generate_ctor_method(self, klass_name):
         template = '''
 // 'ctor' method. Needed for subclassing native objects in JS
-JSBool JSB_%s_ctor(JSContext *cx, uint32_t argc, jsval *vp) {
+bool JSB_%s_ctor(JSContext *cx, uint32_t argc, jsval *vp) {
 
 \tJSObject* obj = (JSObject *)JS_THIS_OBJECT(cx, vp);
-\tJSB_PRECONDITION2( !JSB_get_proxy_for_jsobject(obj), cx, JS_FALSE, "Object already initialzied. error" );
+\tJSB_PRECONDITION2( !JSB_get_proxy_for_jsobject(obj), cx, false, "Object already initialzied. error" );
 
 \tJSB_%s *proxy = [[JSB_%s alloc] initWithJSObject:obj class:[%s class]];
 \t[[proxy class] swizzleMethods];
 
-\tJS_SET_RVAL(cx, vp, JSVAL_TRUE);
+\targs.rval().set(JSVAL_TRUE);
 
 \treturn JS_TRUE;
 }
@@ -968,13 +968,13 @@ JSBool JSB_%s_ctor(JSContext *cx, uint32_t argc, jsval *vp) {
         # "!" or ""
         # proxy.initialized = YES (or nothing)
         template_methodname = '''
-JSBool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp) {
+bool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp) {
 '''
         template_init = '''
 \tJSObject* jsthis = (JSObject *)JS_THIS_OBJECT(cx, vp);
 \tJSB_NSObject *proxy = (JSB_NSObject*) JSB_get_proxy_for_jsobject(jsthis);
 
-\tJSB_PRECONDITION2( proxy && %s[proxy realObj], cx, JS_FALSE, "Invalid Proxy object");
+\tJSB_PRECONDITION2( proxy && %s[proxy realObj], cx, false, "Invalid Proxy object");
 '''
 
         selector = method['selector']
@@ -995,15 +995,15 @@ JSBool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp) {
             min_args = properties.get('min_args', None)
             max_args = properties.get('max_args', None)
             if min_args != max_args:
-                method_assert_on_arguments = '\tJSB_PRECONDITION2( argc >= %d && argc <= %d , cx, JS_FALSE, "Invalid number of arguments" );\n' % (min_args, max_args)
+                method_assert_on_arguments = '\tJSB_PRECONDITION2( argc >= %d && argc <= %d , cx, false, "Invalid number of arguments" );\n' % (min_args, max_args)
             elif 'variadic_2_array' in properties:
-                method_assert_on_arguments = '\tJSB_PRECONDITION2( argc >= 0, cx, JS_FALSE, "Invalid number of arguments" );\n'
+                method_assert_on_arguments = '\tJSB_PRECONDITION2( argc >= 0, cx, false, "Invalid number of arguments" );\n'
             else:
                 # default
-                method_assert_on_arguments = '\tJSB_PRECONDITION2( argc == %d, cx, JS_FALSE, "Invalid number of arguments" );\n' % num_of_args
+                method_assert_on_arguments = '\tJSB_PRECONDITION2( argc == %d, cx, false, "Invalid number of arguments" );\n' % num_of_args
         except KeyError:
             # No, it only has required arguments
-            method_assert_on_arguments = '\tJSB_PRECONDITION2( argc == %d, cx, JS_FALSE, "Invalid number of arguments" );\n' % num_of_args
+            method_assert_on_arguments = '\tJSB_PRECONDITION2( argc == %d, cx, false, "Invalid number of arguments" );\n' % num_of_args
         self.fd_mm.write(method_assert_on_arguments)
 
     def generate_method_suffix(self):
@@ -1075,7 +1075,7 @@ JSBool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp) {
                     call_real = self.generate_method_call_to_real_object(properties['calls'][i], i, ret_js_type, args_declared_type, args_js_type, class_name, method_type)
                     self.fd_mm.write('\n\t%sif( argc == %d ) {\n\t%s\n\t}' % (else_str, i, call_real))
                     else_str = 'else '
-            self.fd_mm.write('\n\telse\n\t\tJSB_PRECONDITION2(NO, cx, JS_FALSE, "Error in number of arguments");\n\n')
+            self.fd_mm.write('\n\telse\n\t\tJSB_PRECONDITION2(NO, cx, false, "Error in number of arguments");\n\n')
 
         else:
             call_real = self.generate_method_call_to_real_object(method_name, num_of_args, ret_js_type, args_declared_type, args_js_type, class_name, method_type)
@@ -1262,7 +1262,7 @@ extern JSClass *%s_class;
 
         manual_methods = ''
         manual_callbacks = ''
-        method_sig = 'JSBool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp);\n'
+        method_sig = 'bool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp);\n'
         callback_sig = '-(%s) %s;\n'
 
         # 1)
@@ -1334,7 +1334,7 @@ extern JSClass *%s_class;
         template_body = '''\
 \tif (_jsObj) {
 \t\tJSContext* cx = [[JSBCore sharedInstance] globalContext];
-\t\tJSBool found;
+\t\tbool found;
 \t\tJSB_ENSURE_AUTOCOMPARTMENT(cx, _jsObj);
 \t\tJS_HasProperty(cx, _jsObj, "%s", &found);
 \t\tif (found == JS_TRUE) {
@@ -1346,7 +1346,7 @@ extern JSClass *%s_class;
 '''
         template_ret = '''\
 \t\t\t%(ret_type)s ret_val;
-\t\t\tJSBool ok = %(convert)s;
+\t\t\tbool ok = %(convert)s;
 \t\t\tret = ret_val;
 \t\t\tJSB_PRECONDITION2( ok, cx, ret, "Error converting return value to object");
 '''
@@ -1501,7 +1501,7 @@ void %s_createClass(JSContext *cx, JSObject* globalObj, const char* name )
         # 3-4: JSB_CCNode
         init_class_template = '''
 \t%s_object = JS_InitClass(cx, globalObj, %s_object, %s_class, %s_constructor,0,properties,funcs,NULL,st_funcs);
-\tJSBool found;
+\tbool found;
 \tJS_SetPropertyAttributes(cx, globalObj, name, JSPROP_ENUMERATE | JSPROP_READONLY, &found);
 }
 '''
@@ -1755,7 +1755,7 @@ extern "C" {
 
     def generate_function_declaration(self, func_name):
         # JSB_ccDrawPoint
-        template_funcname = 'JSBool %s%s(JSContext *cx, uint32_t argc, jsval *vp);\n'
+        template_funcname = 'bool %s%s(JSContext *cx, uint32_t argc, jsval *vp);\n'
         self.fd_h.write(template_funcname % (PROXY_PREFIX, func_name))
 
     def generate_function_c_call_arg(self, i, dt):
@@ -1790,12 +1790,12 @@ extern "C" {
     def generate_function_prefix(self, func_name, num_of_args):
         # JSB_ccDrawPoint
         template_funcname = '''
-JSBool %s%s(JSContext *cx, uint32_t argc, jsval *vp) {
+bool %s%s(JSContext *cx, uint32_t argc, jsval *vp) {
 '''
         self.fd_mm.write(template_funcname % (PROXY_PREFIX, func_name))
 
         # Number of arguments
-        self.fd_mm.write('\tJSB_PRECONDITION2( argc == %d, cx, JS_FALSE, "Invalid number of arguments" );\n' % num_of_args)
+        self.fd_mm.write('\tJSB_PRECONDITION2( argc == %d, cx, false, "Invalid number of arguments" );\n' % num_of_args)
 
     def generate_function_suffix(self):
         end_template = '''
@@ -2045,9 +2045,9 @@ JSObject* %s_object = NULL;
     def generate_implementation_class_constructor(self, klass_name):
         template_0_pre = '''
 // Constructor
-JSBool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
+bool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
 {
-\tJSB_PRECONDITION2(argc==%d, cx, JS_FALSE, "Invalid number of arguments");
+\tJSB_PRECONDITION2(argc==%d, cx, false, "Invalid number of arguments");
 '''
         template_0_post = '''
 \treturn JS_TRUE;
@@ -2057,7 +2057,7 @@ JSBool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
         template_1_b = '''
 \n\tJSB_set_jsobject_for_proxy(jsobj, ret_val);
 \tJSB_set_c_proxy_for_jsobject(jsobj, ret_val, JSB_C_FLAG_CALL_FREE);
-\tJS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(jsobj));
+\targs.rval().set(OBJECT_TO_JSVAL(jsobj));
 '''
 
         constructor_suffix = self.c_object_properties['constructor_suffix'].keys()[0]
@@ -2280,7 +2280,7 @@ void %s_createClass(JSContext *cx, JSObject* globalObj, const char* name )
 
         template_end = '''
 \t%s_object = JS_InitClass(cx, globalObj, %s, %s_class, %s_constructor,0,properties,funcs,NULL,st_funcs);
-\tJSBool found;
+\tbool found;
 \tJS_SetPropertyAttributes(cx, globalObj, name, JSPROP_ENUMERATE | JSPROP_READONLY, &found);
 }
 '''
