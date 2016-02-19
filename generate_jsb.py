@@ -628,7 +628,7 @@ class JSBGenerate(object):
                 if i < first_arg:
                     continue
 
-                if optional_args != None and i >= optional_args:
+                if optional_args is not None and i >= optional_args:
                     self.fd_mm.write('\tif (argc >= %d) {\n\t' % (i + 1))
 
                 self.fd_mm.write(self.generate_argument(i, arg, args_declared_type[i]))
@@ -1696,7 +1696,7 @@ class JSBGenerateFunctions(JSBGenerate):
     def create_files(self):
         self.fd_h = open('%s%s_functions.h' % (BINDINGS_PREFIX, self.namespace), 'w')
         self.generate_function_header_prefix()
-        self.fd_mm = open('%s%s_functions.mm' % (BINDINGS_PREFIX, self.namespace), 'w')
+        self.fd_mm = open('%s%s_functions.cpp' % (BINDINGS_PREFIX, self.namespace), 'w')
 
     def get_function_property(self, func_name, property):
         try:
@@ -1951,7 +1951,7 @@ class JSBGenerateOOFunctions(JSBGenerateFunctions):
 
     def create_files(self):
         self.fd_h = open('%s%s_auto_classes.h' % (BINDINGS_PREFIX, self.namespace), 'w')
-        self.fd_mm = open('%s%s_auto_classes.mm' % (BINDINGS_PREFIX, self.namespace), 'w')
+        self.fd_mm = open('%s%s_auto_classes.cpp' % (BINDINGS_PREFIX, self.namespace), 'w')
         self.fd_registration = open('%s%s_auto_classes_registration.h' % (BINDINGS_PREFIX, self.namespace), 'w')
 
     def get_base_class(self, klass_name):
