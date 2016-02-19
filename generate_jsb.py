@@ -1646,7 +1646,7 @@ void %s_createClass(JSContext *cx, JS::HandleObject globalObj, const char* name 
 
             class_name = self.convert_class_name_to_js(klass)
 
-            self.class_registration_file.write('%s%s_createClass(_cx, %s, "%s");\n' % (PROXY_PREFIX, klass, self.namespace, class_name))
+            self.class_registration_file.write('%s%s_createClass(cx, %s, "%s");\n' % (PROXY_PREFIX, klass, self.namespace, class_name))
             self.classes_registered.append(klass)
 
     def generate_classes_registration(self):
@@ -2053,14 +2053,12 @@ bool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
 \treturn true;
 }
 '''
-        template_1_a = '\tJS::RootedObject grooveJointProto(cx, JSB_cpGrooveJoint_object);\n' \
-                       '\tJS::RootedObject jsobj(cx, JS_NewObject(cx, JSB_cpGrooveJoint_class, grooveJointProto, JS::NullPtr()));\n' \
-                       '\tJS::CallArgs args = JS::CallArgsFromVp(argc, vp);\n'
-
-        template_1_a = '\tJSObject *jsobj = JS_NewObject(cx, JSB_%s_class, JSB_%s_object, NULL);\n'
+        template_1_a = '\tJS::RootedObject %s_proto(cx, JSB_%s_object);\n' \
+                       '\tJS::RootedObject jsobj(cx, JS_NewObject(cx, JSB_%s_class, %s_proto, JS::NullPtr()));\n' \
+                       '\tJS::CallArgs args = JS::CallArgsFromVp(argc, vp);'
         template_1_b = '''
-\n\tJSB_set_jsobject_for_proxy(jsobj, ret_val);
-\tJSB_set_c_proxy_for_jsobject(jsobj, ret_val, JSB_C_FLAG_CALL_FREE);
+\n\tjsb_set_jsobject_for_proxy(jsobj, ret_val);
+\tjsb_set_c_proxy_for_jsobject(jsobj, ret_val, JSB_C_FLAG_CALL_FREE);
 \targs.rval().set(OBJECT_TO_JSVAL(jsobj));
 '''
 
@@ -2094,7 +2092,7 @@ bool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
                 # writes method description
                 self.fd_mm.write('// Arguments: %s' % ', '.join(args_declared_type))
                 self.fd_mm.write(template_0_pre % (name, num_of_args))
-                self.fd_mm.write(template_1_a % (klass_name, klass_name))
+                self.fd_mm.write(template_1_a % (klass_name, klass_name, klass_name, klass_name))
 
                 if num_of_args > 0:
                     self.generate_arguments(args_declared_type, args_js_type)
@@ -2332,7 +2330,7 @@ void %s_createClass(JSContext *cx, JS::HandleObject globalObj, const char* name 
             if klass_name.startswith(self.function_prefix):
                 js_class_name = klass_name[len(self.function_prefix):]
 
-            self.fd_registration.write('%s%s_createClass(_cx, %s, "%s");\n' % (PROXY_PREFIX, klass_name, self.namespace, js_class_name))
+            self.fd_registration.write('%s%s_createClass(cx, %s, "%s");\n' % (PROXY_PREFIX, klass_name, self.namespace, js_class_name))
         self.generate_autogenerate_suffix(self.fd_registration)
 
     def generate_bindings(self):
