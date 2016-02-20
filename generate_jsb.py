@@ -2076,7 +2076,7 @@ bool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
 
         # Manually bound constructor ?
         if klass in self.manual_bound_methods and func_name in self.manual_bound_methods[klass]:
-            sys.stderr.write("'Constructor': %s manually bound" % func_name)
+            sys.stderr.write("'Constructor': %s manually bound\n" % func_name)
             return
 
         num_of_args = 0
@@ -2147,7 +2147,7 @@ void %s_finalize(JSFreeOp *fop, JSObject *jsthis)
 
         # Manually bound constructor ?
         if klass in self.manual_bound_methods and func_name in self.manual_bound_methods[klass]:
-            sys.stderr.write("'Destructor': %s manually bound" % func_name)
+            sys.stderr.write("'Destructor': %s manually bound\n" % func_name)
             return
 
         self.fd_mm.write(template % (name,
