@@ -569,7 +569,7 @@ class JSBGenerate(object):
     def generate_argument(self, i, arg_js_type, arg_declared_type):
         template = self.convert_js_to_objc(arg_js_type, arg_declared_type)
         template = template % ({
-            "jsval": "args.get(%d)" % i,
+            "jsval": "args.get(arg_idx++)",
             "retval": "&arg%d" % i
         })
         return "\tok &= %s;\n" % template
@@ -1062,6 +1062,7 @@ bool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp) {
 
         total_args = self.get_number_of_arguments(method)
         if total_args > 0:
+            self.fd_mm.write('\n\tint arg_idx=0; // #000\n')
             self.generate_arguments(args_declared_type, args_js_type, properties)
 
         if ret_js_type:
@@ -1074,7 +1075,7 @@ bool %s_%s%s(JSContext *cx, uint32_t argc, jsval *vp) {
                     call_real = self.generate_method_call_to_real_object(properties['calls'][i], i, ret_js_type, args_declared_type, args_js_type, class_name, method_type)
                     self.fd_mm.write('\n\t%sif( argc == %d ) {\n\t%s\n\t}' % (else_str, i, call_real))
                     else_str = 'else '
-            self.fd_mm.write('\n\telse\n\t\tJSB_PRECONDITION2(NO, cx, false, "Error in number of arguments");\n\n')
+            self.fd_mm.write('\n\telse\n\t\tJSB_PRECONDITION2(false, cx, false, "Error in number of arguments");\n\n')
 
         else:
             call_real = self.generate_method_call_to_real_object(method_name, num_of_args, ret_js_type, args_declared_type, args_js_type, class_name, method_type)
@@ -1792,7 +1793,7 @@ bool %s%s(JSContext *cx, uint32_t argc, jsval *vp) {
         self.fd_mm.write(template_funcname % (PROXY_PREFIX, func_name))
 
         # Number of arguments
-        self.fd_mm.write('\tJSB_PRECONDITION2( argc == %d, cx, false, "Invalid number of arguments" );\n' % num_of_args)
+        self.fd_mm.write('\tJSB_PRECONDITION2(argc == %d, cx, false, "Invalid number of arguments" );\n' % num_of_args)
 
         # args is used as return value as well
         self.fd_mm.write('\tJS::CallArgs args = JS::CallArgsFromVp(argc, vp);\n')
@@ -1822,6 +1823,7 @@ bool %s%s(JSContext *cx, uint32_t argc, jsval *vp) {
         self.generate_function_prefix(func_name, num_of_args)
 
         if len(args_js_type) > 0:
+            self.fd_mm.write('\n\tint arg_idx=0; // #001\n')
             self.generate_arguments(args_declared_type, args_js_type)
 
         if ret_js_type:
@@ -2095,6 +2097,7 @@ bool %s_constructor(JSContext *cx, uint32_t argc, jsval *vp)
                 self.fd_mm.write(template_1_a % (klass_name, klass_name, klass_name, klass_name))
 
                 if num_of_args > 0:
+                    self.fd_mm.write('\n\tint arg_idx=0; // #002\n')
                     self.generate_arguments(args_declared_type, args_js_type)
 
                 call = self.generate_function_c_call(func_name, num_of_args, True, args_declared_type)
@@ -2176,6 +2179,7 @@ void %s_finalize(JSFreeOp *fop, JSObject *jsthis)
 
         # Skip first argument, since argv[0] should be "self"
         if len(args_js_type) > 1:
+            self.fd_mm.write('\tint arg_idx=0; // #003\n')
             self.generate_arguments(args_declared_type, args_js_type, {'first_arg': 1})
 
         if ret_js_type:
