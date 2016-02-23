@@ -453,6 +453,12 @@
 <arg declared_type='cpVect' name='point' type='{cpVect=ff}'/>
 <retval declared_type='void' type='v'/>
 </function>
+<function name='cpBodyApplyImpulse'>
+<arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
+<arg const='true' declared_type='cpVect' name='j' type='{cpVect=ff}'/>
+<arg const='true' declared_type='cpVect' name='r' type='{cpVect=ff}'/>
+<retval declared_type='void' type='v'/>
+</function>
 <function name='cpBodyApplyImpulseAtLocalPoint'>
 <arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <arg declared_type='cpVect' name='impulse' type='{cpVect=ff}'/>
@@ -598,6 +604,11 @@
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='cpFloat' type='f'/>
 </function>
+<function name='cpBodyLocal2World'>
+<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
+<arg const='true' declared_type='cpVect' name='point' type='{cpVect=ff}'/>
+<retval declared_type='cpVect' type='{cpVect=ff}'/>
+</function>
 <function name='cpBodyLocalToWorld'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <arg const='true' declared_type='cpVect' name='point' type='{cpVect=ff}'/>
@@ -724,6 +735,11 @@
 <arg declared_type='cpFloat' name='damping' type='f'/>
 <arg declared_type='cpFloat' name='dt' type='f'/>
 <retval declared_type='void' type='v'/>
+</function>
+<function name='cpBodyWorld2Local'>
+<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
+<arg const='true' declared_type='cpVect' name='point' type='{cpVect=ff}'/>
+<retval declared_type='cpVect' type='{cpVect=ff}'/>
 </function>
 <function name='cpBodyWorldToLocal'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
@@ -1372,6 +1388,10 @@
 <arg declared_type='cpFloat' name='radius' type='f'/>
 <retval declared_type='cpShape*' type='^{cpShape=}'/>
 </function>
+<function name='cpPolyShapeNumVerts'>
+<arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
+<retval declared_type='int' type='i'/>
+</function>
 <function name='cpPolylineConvexDecomposition'>
 <arg declared_type='cpPolyline*' name='line' type='^{cpPolyline=ii^{cpVect=ff}}'/>
 <arg declared_type='cpFloat' name='tol' type='f'/>
@@ -1833,6 +1853,11 @@
 <retval declared_type='cpBool' type='C'/>
 </function>
 <function name='cpSpaceAddShape'>
+<arg declared_type='cpSpace*' name='space' type='^{cpSpace=}'/>
+<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
+<retval declared_type='cpShape*' type='^{cpShape=}'/>
+</function>
+<function name='cpSpaceAddStaticShape'>
 <arg declared_type='cpSpace*' name='space' type='^{cpSpace=}'/>
 <arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <retval declared_type='cpShape*' type='^{cpShape=}'/>
