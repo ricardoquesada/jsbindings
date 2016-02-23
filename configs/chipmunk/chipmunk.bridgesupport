@@ -453,12 +453,6 @@
 <arg declared_type='cpVect' name='point' type='{cpVect=ff}'/>
 <retval declared_type='void' type='v'/>
 </function>
-<function name='cpBodyApplyImpulse'>
-<arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<arg const='true' declared_type='cpVect' name='j' type='{cpVect=ff}'/>
-<arg const='true' declared_type='cpVect' name='r' type='{cpVect=ff}'/>
-<retval declared_type='void' type='v'/>
-</function>
 <function name='cpBodyApplyImpulseAtLocalPoint'>
 <arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <arg declared_type='cpVect' name='impulse' type='{cpVect=ff}'/>
@@ -512,10 +506,6 @@
 <arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='void' type='v'/>
 </function>
-<function name='cpBodyGetAngVel'>
-<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<retval declared_type='cpFloat' type='f'/>
-</function>
 <function name='cpBodyGetAngle'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='cpFloat' type='f'/>
@@ -540,15 +530,7 @@
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='cpFloat' type='f'/>
 </function>
-<function name='cpBodyGetPos'>
-<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<retval declared_type='cpVect' type='{cpVect=ff}'/>
-</function>
 <function name='cpBodyGetPosition'>
-<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<retval declared_type='cpVect' type='{cpVect=ff}'/>
-</function>
-<function name='cpBodyGetRot'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='cpVect' type='{cpVect=ff}'/>
 </function>
@@ -571,10 +553,6 @@
 <function name='cpBodyGetUserData'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='cpDataPointer' type='^v'/>
-</function>
-<function name='cpBodyGetVel'>
-<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<retval declared_type='cpVect' type='{cpVect=ff}'/>
 </function>
 <function name='cpBodyGetVelocity'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
@@ -604,11 +582,6 @@
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <retval declared_type='cpFloat' type='f'/>
 </function>
-<function name='cpBodyLocal2World'>
-<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<arg const='true' declared_type='cpVect' name='point' type='{cpVect=ff}'/>
-<retval declared_type='cpVect' type='{cpVect=ff}'/>
-</function>
 <function name='cpBodyLocalToWorld'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <arg const='true' declared_type='cpVect' name='point' type='{cpVect=ff}'/>
@@ -624,11 +597,6 @@
 </function>
 <function name='cpBodyNewStatic'>
 <retval declared_type='cpBody*' type='^{cpBody=}'/>
-</function>
-<function name='cpBodySetAngVel'>
-<arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<arg declared_type='cpFloat' name='angularVelocity' type='f'/>
-<retval declared_type='void' type='v'/>
 </function>
 <function name='cpBodySetAngle'>
 <arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
@@ -660,11 +628,6 @@
 <arg declared_type='cpFloat' name='i' type='f'/>
 <retval declared_type='void' type='v'/>
 </function>
-<function name='cpBodySetPos'>
-<arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<arg declared_type='cpVect' name='pos' type='{cpVect=ff}'/>
-<retval declared_type='void' type='v'/>
-</function>
 <function name='cpBodySetPosition'>
 <arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <arg declared_type='cpVect' name='pos' type='{cpVect=ff}'/>
@@ -692,11 +655,6 @@
 <function name='cpBodySetUserData'>
 <arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
 <arg declared_type='cpDataPointer' name='userData' type='^v'/>
-<retval declared_type='void' type='v'/>
-</function>
-<function name='cpBodySetVel'>
-<arg declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<arg declared_type='cpVect' name='velocity' type='{cpVect=ff}'/>
 <retval declared_type='void' type='v'/>
 </function>
 <function name='cpBodySetVelocity'>
@@ -735,11 +693,6 @@
 <arg declared_type='cpFloat' name='damping' type='f'/>
 <arg declared_type='cpFloat' name='dt' type='f'/>
 <retval declared_type='void' type='v'/>
-</function>
-<function name='cpBodyWorld2Local'>
-<arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
-<arg const='true' declared_type='cpVect' name='point' type='{cpVect=ff}'/>
-<retval declared_type='cpVect' type='{cpVect=ff}'/>
 </function>
 <function name='cpBodyWorldToLocal'>
 <arg const='true' declared_type='cpBody*' name='body' type='^{cpBody=}'/>
@@ -1388,10 +1341,6 @@
 <arg declared_type='cpFloat' name='radius' type='f'/>
 <retval declared_type='cpShape*' type='^{cpShape=}'/>
 </function>
-<function name='cpPolyShapeNumVerts'>
-<arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<retval declared_type='int' type='i'/>
-</function>
 <function name='cpPolylineConvexDecomposition'>
 <arg declared_type='cpPolyline*' name='line' type='^{cpPolyline=ii^{cpVect=ff}}'/>
 <arg declared_type='cpFloat' name='tol' type='f'/>
@@ -1621,14 +1570,6 @@
 <arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <retval declared_type='cpFloat' type='f'/>
 </function>
-<function name='cpShapeGetGroup'>
-<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<retval declared_type='uintptr_t' type='L'/>
-</function>
-<function name='cpShapeGetLayers'>
-<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<retval declared_type='unsigned int' type='I'/>
-</function>
 <function name='cpShapeGetMass'>
 <arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <retval declared_type='cpFloat' type='f'/>
@@ -1652,12 +1593,6 @@
 <function name='cpShapeGetUserData'>
 <arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <retval declared_type='cpDataPointer' type='^v'/>
-</function>
-<function name='cpShapeNearestPointQuery'>
-<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<arg declared_type='cpVect' name='p' type='{cpVect=ff}'/>
-<arg declared_type='cpPointQueryInfo*' name='out' type='^{cpPointQueryInfo=^{cpShape}{cpVect=ff}f{cpVect=ff}}'/>
-<retval declared_type='cpFloat' type='f'/>
 </function>
 <function name='cpShapePointQuery'>
 <arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
@@ -1701,16 +1636,6 @@
 <function name='cpShapeSetFriction'>
 <arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <arg declared_type='cpFloat' name='friction' type='f'/>
-<retval declared_type='void' type='v'/>
-</function>
-<function name='cpShapeSetGroup'>
-<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<arg declared_type='uintptr_t' name='group' type='L'/>
-<retval declared_type='void' type='v'/>
-</function>
-<function name='cpShapeSetLayers'>
-<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<arg declared_type='unsigned int' name='layer' type='I'/>
 <retval declared_type='void' type='v'/>
 </function>
 <function name='cpShapeSetMass'>
@@ -1859,11 +1784,6 @@
 <retval declared_type='cpBool' type='C'/>
 </function>
 <function name='cpSpaceAddShape'>
-<arg declared_type='cpSpace*' name='space' type='^{cpSpace=}'/>
-<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
-<retval declared_type='cpShape*' type='^{cpShape=}'/>
-</function>
-<function name='cpSpaceAddStaticShape'>
 <arg declared_type='cpSpace*' name='space' type='^{cpSpace=}'/>
 <arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <retval declared_type='cpShape*' type='^{cpShape=}'/>
