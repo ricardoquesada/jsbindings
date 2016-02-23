@@ -1501,7 +1501,7 @@ void %s_createClass(JSContext *cx, JS::HandleObject globalObj, const char* name 
         # 3-4: JSB_CCNode
         init_class_template = '''
 \t%s_object = JS_InitClass(cx, globalObj, JS::RootedObject(cx,%s_object), %s_class, %s_constructor,0,properties,funcs,NULL,st_funcs);
-\tbool found;
+\tbool found // #001;
 }
 '''
         proxy_class_name = '%s%s' % (PROXY_PREFIX, class_name)
@@ -2286,7 +2286,6 @@ void %s_createClass(JSContext *cx, JS::HandleObject globalObj, const char* name 
 
         template_end = '''
 \t%s_object = JS_InitClass(cx, globalObj, JS::RootedObject(cx,%s), %s_class, %s_constructor,0,properties,funcs,NULL,st_funcs);
-\tbool found;
 }
 '''
         parent = self.get_base_class(klass_name)
