@@ -1653,6 +1653,12 @@
 <arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <retval declared_type='cpDataPointer' type='^v'/>
 </function>
+<function name='cpShapeNearestPointQuery'>
+<arg declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
+<arg declared_type='cpVect' name='p' type='{cpVect=ff}'/>
+<arg declared_type='cpPointQueryInfo*' name='out' type='^{cpPointQueryInfo=^{cpShape}{cpVect=ff}f{cpVect=ff}}'/>
+<retval declared_type='cpFloat' type='f'/>
+</function>
 <function name='cpShapePointQuery'>
 <arg const='true' declared_type='cpShape*' name='shape' type='^{cpShape=}'/>
 <arg declared_type='cpVect' name='p' type='{cpVect=ff}'/>
